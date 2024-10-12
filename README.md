@@ -194,7 +194,7 @@ FROM hourly_sale
 ```
 
 
-11 Find the total quantity sold and total sales for each category while showing the highest total sales first first.
+11. Find the total quantity sold and total sales for each category while showing the highest total sales first first.
 ```sql
 
 select category , sum(quantiy)"Total Quantity Sold" , sum(total_sale) "Total Sales"
@@ -204,7 +204,7 @@ order by 3 desc;
 
 ```
 
-12 find the percentage of total sales contributed by each gender.
+12. find the percentage of total sales contributed by each gender.
 ```sql
 
 select gender , count(*) "Total Sales Count" , avg(total_sale) , sum(total_sale) "Total Sales Generated" ,
@@ -213,7 +213,7 @@ from retail_sales
 group by 1;
 
 ```
-13 Identify the month with the highest total sales for each year.
+13. Identify the month with the highest total sales for each year.
 ```sql
 
 with cte as 
@@ -229,7 +229,7 @@ where rnk = 1
 ;
 
 ```
-14  Retrieve the top-selling product category for each age group (e.g., 18-25, 26-35, etc.).
+14. Retrieve the top-selling product category for each age group (e.g., 18-25, 26-35, etc.).
 
 ```sql
 
@@ -274,7 +274,7 @@ WHERE
 
 ```
 
-15 Find the average transaction value for each customer and identify the customer with the highest average transaction value.
+15. Find the average transaction value for each customer and identify the customer with the highest average transaction value.
 ```sql
 
 with cte as 
