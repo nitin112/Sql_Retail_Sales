@@ -72,7 +72,11 @@ select * from retail_sales where sale_date = '2022-11-05';
 
 -- Q.2 Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022
 
-select * from retail_sales where category = 'Clothing' and (sale_date) >= '2022-11-01' and sale_date < '2022-12-01' and quantiy >= 4;
+select * from retail_sales
+where category = 'Clothing' and (sale_date) >= '2022-11-01' and sale_date < '2022-12-01'
+and quantiy >= 4;
+
+-- OR --
 
 select * from retail_sales 
 where category = 'Clothing' 
@@ -104,6 +108,8 @@ from retail_sales
 group by 1,2;
 
 -- Q.7 Write a SQL query to calculate the average sale for each month. Find out best selling month in each year
+
+
 
 SELECT year , month , avg_sales
 FROM
@@ -149,8 +155,9 @@ group by 1;
 
 -- Q.10 Write a SQL query to create each shift and number of orders (Example Morning <=12, Afternoon Between 12 & 17, Evening >17)
 
-select count(*), (case when sale_time <= '12:00:00' then 'Morning' when sale_time between '12:00:01' and '17:00:00' then 'Afternoon' else 'Evening' end )"Shift" 
--- count (*) "No of Orders" 
+select  
+(case when sale_time <= '12:00:00' then 'Morning' when sale_time between '12:00:01' and '17:00:00' then 'Afternoon' else 'Evening' end )"Shift" ,
+count (*) "No of Orders" 
 from retail_sales
  group by 2; 
 ;
@@ -159,7 +166,7 @@ from retail_sales
 WITH hourly_sale
 AS
 (
-SELECT *, extract(hour from sale_time) "Hours" ,
+SELECT *,
     CASE
         WHEN EXTRACT(HOUR FROM sale_time) <= 12 THEN 'Morning'
         WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
@@ -169,7 +176,89 @@ FROM retail_sales
 )
 SELECT 
     shift, 
-     *
+     COUNT(*) as total_orders    
 FROM hourly_sale
- -- GROUP BY shift
+ GROUP BY shift
+
+-- Q.11 Find the total quantity sold and total sales for each category while showing the highest total sales first first.
+
+select category , sum(quantiy)"Total Quantity Sold" , sum(total_sale) "Total Sales"
+from retail_sales
+group by 1
+order by 3 desc
+;
+
+-- Q.12 find the percentage of total sales contributed by each gender.
+
+select gender , count(*) "Total Sales Count" , avg(total_sale) , sum(total_sale) "Total Sales Generated" ,
+    (SUM(total_sale) / (SELECT SUM(total_sale) FROM retail_sales) * 100) "percentage_of_total_sales"
+from retail_sales
+group by 1;
+
+-- Q.13 Identify the month with the highest total sales for each year.
+with cte as 
+(
+select extract(year from sale_date) "year",
+extract(month from sale_date) "month" , sum(total_sale) "Total Sales",
+rank() over(partition by extract(year from sale_date) order by sum(total_sale) desc) as rnk
+from retail_sales
+group by 1,2
+)
+select * from cte
+where rnk = 1
+;
+
+-- Q.14  Retrieve the top-selling product category for each age group (e.g., 18-25, 26-35, etc.).
+
+-- getting age group and category wise sales data here
+ WITH AgeGroups AS (
+    SELECT 
+        CASE 
+            WHEN age BETWEEN 17 AND 24 THEN '18-24'
+            WHEN age BETWEEN 25 AND 34 THEN '25-34'
+            WHEN age BETWEEN 35 AND 44 THEN '35-44'
+            WHEN age BETWEEN 45 AND 54 THEN '45-54'
+            WHEN age BETWEEN 55 AND 64 THEN '55-64' else '64+'
+        END AS age_group,
+        category,
+        SUM(total_sale) AS total_sales
+    FROM 
+        retail_sales
+    GROUP BY 
+        age_group, category
+),
+
+-- setting up rank based on total sales done by each age group
+RankedCategories AS (
+    SELECT 
+        age_group,
+        category,
+        total_sales,
+        RANK() OVER (PARTITION BY age_group ORDER BY total_sales DESC) AS sales_rank
+    FROM 
+        AgeGroups
+)
+
+SELECT 
+    age_group,
+    category,
+    total_sales , sales_rank
+FROM 
+    RankedCategories
+WHERE 
+    sales_rank = 1;
+
+
+-- Q.15 Find the average transaction value for each customer and identify the customer with the highest average transaction value.
+with cte as 
+(
+select customer_id , avg(total_sale) "avg_txn"
+from retail_sales
+group by 1
+)
+
+select customer_id , avg_txn
+from cte
+order by 2 desc
+limit 1;
 
