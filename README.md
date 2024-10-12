@@ -193,6 +193,103 @@ FROM hourly_sale
 
 ```
 
+
+11 Find the total quantity sold and total sales for each category while showing the highest total sales first first.
+```sql
+
+select category , sum(quantiy)"Total Quantity Sold" , sum(total_sale) "Total Sales"
+from retail_sales
+group by 1
+order by 3 desc;
+
+```
+
+12 find the percentage of total sales contributed by each gender.
+```sql
+
+select gender , count(*) "Total Sales Count" , avg(total_sale) , sum(total_sale) "Total Sales Generated" ,
+    (SUM(total_sale) / (SELECT SUM(total_sale) FROM retail_sales) * 100) "percentage_of_total_sales"
+from retail_sales
+group by 1;
+
+```
+13 Identify the month with the highest total sales for each year.
+```sql
+
+with cte as 
+(
+select extract(year from sale_date) "year",
+extract(month from sale_date) "month" , sum(total_sale) "Total Sales",
+rank() over(partition by extract(year from sale_date) order by sum(total_sale) desc) as rnk
+from retail_sales
+group by 1,2
+)
+select * from cte
+where rnk = 1
+;
+
+```
+14  Retrieve the top-selling product category for each age group (e.g., 18-25, 26-35, etc.).
+
+```sql
+
+-- getting age group and category wise sales data here
+ WITH AgeGroups AS (
+    SELECT 
+        CASE 
+            WHEN age BETWEEN 17 AND 24 THEN '18-24'
+            WHEN age BETWEEN 25 AND 34 THEN '25-34'
+            WHEN age BETWEEN 35 AND 44 THEN '35-44'
+            WHEN age BETWEEN 45 AND 54 THEN '45-54'
+            WHEN age BETWEEN 55 AND 64 THEN '55-64' else '64+'
+        END AS age_group,
+        category,
+        SUM(total_sale) AS total_sales
+    FROM 
+        retail_sales
+    GROUP BY 
+        age_group, category
+),
+
+
+-- setting up rank based on total sales done by each age group
+RankedCategories AS (
+    SELECT 
+        age_group,
+        category,
+        total_sales,
+        RANK() OVER (PARTITION BY age_group ORDER BY total_sales DESC) AS sales_rank
+    FROM 
+        AgeGroups
+)
+
+SELECT 
+    age_group,
+    category,
+    total_sales , sales_rank
+FROM 
+    RankedCategories
+WHERE 
+    sales_rank = 1;
+
+```
+
+15 Find the average transaction value for each customer and identify the customer with the highest average transaction value.
+```sql
+
+with cte as 
+(
+select customer_id , avg(total_sale) "avg_txn"
+from retail_sales
+group by 1
+)
+
+select customer_id , avg_txn
+from cte
+order by 2 desc
+limit 1;
+
+```
 ## Findings
 
 - **Customer Demographics**: The dataset includes customers from various age groups, with sales distributed across different categories such as Clothing and Beauty.
