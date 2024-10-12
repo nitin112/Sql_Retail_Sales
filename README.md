@@ -80,7 +80,9 @@ select * from retail_sales where sale_date = '2022-11-05';
 2. **Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022**:
 ```sql
 
-select * from retail_sales where category = 'Clothing' and (sale_date) >= '2022-11-01' and sale_date < '2022-12-01' and quantiy >= 4;
+select * from retail_sales
+where category = 'Clothing' and (sale_date) >= '2022-11-01' and sale_date < '2022-12-01'
+and quantiy >= 4;
 
 -- OR --
 
@@ -163,8 +165,9 @@ group by 1;
 10. **Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17)**:
 ```sql
 
-select count(*), (case when sale_time <= '12:00:00' then 'Morning' when sale_time between '12:00:01' and '17:00:00' then 'Afternoon' else 'Evening' end )"Shift" 
--- count (*) "No of Orders" 
+select 
+(case when sale_time <= '12:00:00' then 'Morning' when sale_time between '12:00:01' and '17:00:00' then 'Afternoon' else 'Evening' end )"Shift" 
+count (*) "No of Orders" 
 from retail_sales
  group by 2; 
 ;
